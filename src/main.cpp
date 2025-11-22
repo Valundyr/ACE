@@ -110,20 +110,20 @@ void showSplashScreen() {
   display.clearDisplay();
 }
 
-// --- Menu do desenho---
+// --- Draw menu---
 const char* menuItems[] = {"Dados do IMU","Calib. Acel-Gyro", "Num. de Dados", "Num. de faces", "Tempo a rodar"};
 const int menuLength = sizeof(menuItems) / sizeof(menuItems[0]);
-int menuIndex = 0;   // índice da opção atual
-int menuPage = 0;    // 0 = menu principal, 1..n = submenus
-int diceRange = 6;  // tipo de dado (4, 6, 10, 20)
-int nDice = 1;      // número de dados
-int spinTime = 3;   // tempo de spin em segundos
+int menuIndex = 0;   «
+int menuPage = 0;    
+int diceRange = 6; 
+int nDice = 1;      
+int spinTime = 3;   
 
-// ---- shake globals (uma só definição) ----
-int shakeCount = 0;                // antigo contador de picos positivos (reutilizado)
-unsigned long lastShakeTime = 0;   // tempo do último pico (qualquer)
+// ---- shake globals  ----
+int shakeCount = 0;                «
+unsigned long lastShakeTime = 0;   
 bool calibratedDone = false;
-int diceResults[4]; // resultado final (até 4 dados)
+int diceResults[4]; // final result 
 
 uint8_t Sok = 0, prevSok = 0;
 uint8_t Snext = 0, prevSnext = 0;
@@ -196,11 +196,11 @@ enum {
   dice_launching, dice_showing 
 };
 
-// calibration accumulators (persistentes)
+// calibration accumulators 
 float cal_wx = 0, cal_wy = 0, cal_wz = 0;
 float cal_ax = 0, cal_ay = 0, cal_az = 0;
 
-// --- Variáveis globais para os offsets ---
+// --- Global variables for offsets ---
 float gyroBias[3] = {0, 0, 0};
 float accelBias[3] = {0, 0, 0};
 
@@ -208,14 +208,14 @@ float accelBias[3] = {0, 0, 0};
 int contador = 0;
 const int samples = 200;
 
-// Detecção front-back (variáveis específicas)
-int forwardCount = 0;                  // conta picos "frente" válidos (positivo)
+// Detection front-back 
+int forwardCount = 0;                  // Count positive peaks
 int lastDetectedSign = 0;              // -1 = last was negative, 0 = none, 1 = last positive
-unsigned long lastPeakTime = 0;        // tempo do último pico (positivo ou negativo)
-const float FORWARD_THRESHOLD = 0.6f;  // ajustar conforme força real (em g) - positivo
-const float BACK_THRESHOLD = -0.6f;    // negativo
-const unsigned long PEAK_DEBOUNCE_MS = 200; // evitar múltiplos triggers no mesmo pico
-const unsigned long SEQUENCE_TIMEOUT_MS = 2000; // timeout para reset da contagem
+unsigned long lastPeakTime = 0;        // Time of last total peak
+const float FORWARD_THRESHOLD = 0.6f;  // Adjust the force that triggers the peak
+const float BACK_THRESHOLD = -0.6f;    // negative
+const unsigned long PEAK_DEBOUNCE_MS = 200; // do not let double peak count occur
+const unsigned long SEQUENCE_TIMEOUT_MS = 2000; // timeout and reset
 
 // prevent menu redraw during roll/show
 bool inRollingAnimation = false;
@@ -238,7 +238,6 @@ void drawMenu() {
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
 
-  // Cada item ocupa 12 px de altura → 5 itens = 60 px → cabe bem no 64px de altura
   for (int i = 0; i < menuLength; i++) {
     int y = i * 12;  // espaçamento vertical
     if (i == menuIndex) {
@@ -260,7 +259,7 @@ void drawDiceFace(int x, int y, int size, int value, int range) {
   display.setTextColor(SSD1306_WHITE);
 
   if (range == 4) {
-    // D4 - pirâmide triangular
+    // D4 - triangular piramide
     int h = size;
     int cx = x + size / 2;
     display.drawLine(cx, y, x, y + h, SSD1306_WHITE);
@@ -271,13 +270,13 @@ void drawDiceFace(int x, int y, int size, int value, int range) {
   }
 
   else if (range == 6) {
-    // D6 - cubo com pontos clássicos
+    // D6 - classic dice
     display.drawRect(x, y, size, size, SSD1306_WHITE);
     int cx = x + size / 2;
     int cy = y + size / 2;
     int offset = size / 4;
 
-    // desenhar pontos consoante o valor
+    // Draw of the dots
     switch (value) {
       case 1:
         display.fillCircle(cx, cy, 2, SSD1306_WHITE);
@@ -316,30 +315,30 @@ void drawDiceFace(int x, int y, int size, int value, int range) {
   }
 
   else if (range == 10) {
-  // D10 - losango com base ligeiramente achatada
-  int w = size;           // largura total
-  int h = size * 0.9;     // altura total
+  // D10 - Losangle style
+  int w = size;           // total width
+  int h = size * 0.9;     // total height
   int cx = x + w / 2;
   int cy = y + h / 2;
 
-  // proporções do losango
+  // proportions
   int topY = y;
   int midY = cy;
   int bottomY = y + h;
   int leftX = x;
   int rightX = x + w;
 
-  // Ajustar a base para ser mais "curta" (achatada/bicuda)
-  int bottomOffset = h * 0.2; // quão mais curta fica a base
+  // Ajustar a base the base
+  int bottomOffset = h * 0.2; 
   int bottomYAdj = bottomY - bottomOffset;
 
-  // Desenhar contorno
-  display.drawLine(cx, topY, rightX, midY, SSD1306_WHITE);       // lado superior direito
-  display.drawLine(rightX, midY, cx, bottomYAdj, SSD1306_WHITE); // lado inferior direito
-  display.drawLine(cx, bottomYAdj, leftX, midY, SSD1306_WHITE);  // lado inferior esquerdo
-  display.drawLine(leftX, midY, cx, topY, SSD1306_WHITE);        // lado superior esquerdo
+  // draw the boundaries
+  display.drawLine(cx, topY, rightX, midY, SSD1306_WHITE);       
+  display.drawLine(rightX, midY, cx, bottomYAdj, SSD1306_WHITE); 
+  display.drawLine(cx, bottomYAdj, leftX, midY, SSD1306_WHITE);  
+  display.drawLine(leftX, midY, cx, topY, SSD1306_WHITE);        
 
-  // Número centrado na face
+  // Number center at the face
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   int16_t x1, y1;
@@ -352,7 +351,7 @@ void drawDiceFace(int x, int y, int size, int value, int range) {
 }
 
 else if (range == 20) {
-  // D20 - hexágono alongado
+  // D20 - Alongated Hexagone
   int h = size / 2;
   int cx = x + size / 2;
   int cy = y + size / 2;
@@ -365,7 +364,7 @@ else if (range == 20) {
   display.drawLine(cx + size / 3, cy + h, cx - size / 3, cy + h, SSD1306_WHITE);
   display.drawLine(cx - size / 3, cy + h, cx - size / 2, cy, SSD1306_WHITE);
 
-  // Número centrado
+  // Number centered
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
 
@@ -376,13 +375,12 @@ else if (range == 20) {
   uint16_t wText, hText;
   display.getTextBounds(buf, 0, 0, &x1, &y1, &wText, &hText);
 
-  // centra horizontal e verticalmente no hexágono
   display.setCursor(cx - wText / 2, cy - hText / 2);
   display.print(buf);
 }
 
   else {
-    // fallback genérico
+    // generic fallback 
     display.drawRect(x, y, size, size, SSD1306_WHITE);
     display.setCursor(x + size / 2 - 3, y + size / 2 - 3);
     display.printf("%d", value);
@@ -409,7 +407,7 @@ void rollDiceAnimationAndResults() {
     int baseX = (SCREEN_WIDTH - (numToRoll * spacing)) / 2;
     int baseY = 20;
 
-    // efeito de tremor (shake)
+    // shake
     int shakeX = random(-2, 3);
     int shakeY = random(-2, 3);
 
@@ -424,12 +422,12 @@ void rollDiceAnimationAndResults() {
     delay(120);
   }
 
-  // gera resultados finais
+  // final results
   for (int i = 0; i < numToRoll; i++) {
     diceResults[i] = random(1, diceRange + 1);
   }
 
-  // mostrar resultados finais
+  // Show the final results
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0, 0);
@@ -447,7 +445,7 @@ void rollDiceAnimationAndResults() {
   int total = 0;
   for (int i = 0; i < numToRoll; i++) total += diceResults[i];
 
-  // total centrado em baixo
+  // total sum center at the base of the display
   String totalStr = "Total: " + String(total);
   int16_t x1, y1;
   uint16_t w, h;
@@ -470,7 +468,7 @@ void setup() {
   pinMode(Snext_pin, INPUT_PULLUP);
   pinMode(Sesc_pin, INPUT_PULLUP);
 
-  // inicializar FSMs
+  // inicialize FSMs
   set_state(fsm1, sm1_off);
   set_state(fsm2, sm2_off);
   set_state(fsm3, sm3_off);
@@ -617,7 +615,7 @@ void loop() {
     if (fsm2.state == sm2_off && fsm1.state == sm1_on && fsm1.tis > 2000) {
       fsm2.new_state = sm2_on;
       fsm1.new_state = sm1_off;
-      //Mostrar logotipo da FEUP ao ligar o ecrã
+      //Show FEUP logo
       showSplashScreen();
 
       /*menuPage = 0;
@@ -652,21 +650,21 @@ void loop() {
       fsm4.new_state = rest;
     }
 
-    // Transições na Calibração (fsm5)
+    // Calibration transitions  (fsm5)
     if (fsm5.state == mensagem_ini) {
       fsm5.new_state = cal_colect;
     }
     if (fsm5.state == cal_colect && contador == samples) {
       fsm5.new_state = cal_finish;
     } else if (fsm5.state == cal_colect) {
-      // contador incrementa quando estamos a recolher (realizado mais abaixo)
+		
     }
     if (fsm5.state == cal_finish) {
       contador = 0;
       fsm5.new_state = Stop;
     }
 
-    // actualizar fsm1..fsm5 antes das transições de FSM6 
+    // actualize fsm1..fsm5 before FSM6 transtions 
     set_state(fsm1, fsm1.new_state);
     set_state(fsm2, fsm2.new_state);
     set_state(fsm3, fsm3.new_state);
@@ -674,17 +672,16 @@ void loop() {
     set_state(fsm5, fsm5.new_state);
 
     // ------------------------------
-    // FSM6 (frente-trás detection -> roll)
+    // FSM6 (foward-back detection -> roll)
     // ------------------------------
     fsm6.tis = millis() - fsm6.tes;
 
-    // Usamos o eixo X como "frente/trás" (ajusta para .y ou .z se necessário)
     float axisX = imu.a.x; // raw or bias-corrected depending on calibratedDone
 
-    // Detect peaks: positivo = frente, negativo = trás
+    // Detect peaks: positive = foward negative = back
     unsigned long nowMs = millis();
 
-    // Se timeout excedido, reset da contagem
+    // if timeout exceeded, reset
     if (nowMs - lastPeakTime > SEQUENCE_TIMEOUT_MS) {
       forwardCount = 0;
       lastDetectedSign = 0;
@@ -693,7 +690,6 @@ void loop() {
     // detect positive (forward) peak
     if (axisX > FORWARD_THRESHOLD) {
       if (nowMs - lastPeakTime > PEAK_DEBOUNCE_MS) {
-        // apenas conta um pico positivo se o último sido negativo (alternância)
         if (lastDetectedSign <= 0) {
           forwardCount++;
           lastDetectedSign = 1;
@@ -705,7 +701,6 @@ void loop() {
     // detect negative (back) peak
     else if (axisX < BACK_THRESHOLD) {
       if (nowMs - lastPeakTime > PEAK_DEBOUNCE_MS) {
-        // atualiza sinal mas não incrementa forwardCount
         if (lastDetectedSign >= 0) {
           lastDetectedSign = -1;
           lastPeakTime = nowMs;
@@ -714,55 +709,53 @@ void loop() {
       }
     }
 
-    // transições da FSM6 com base no forwardCount
+    // Transitions of FSM6, forwardCount
     if (fsm6.state == dice_idle) {
-      // Só detecta no menu principal e com ecrã ligado and after calibration done
       if (fsm2.state == sm2_on && menuPage == 0 && calibratedDone) {
         if (forwardCount >= 1 && lastDetectedSign == 1) {
-          // comecei a contar, passo para detecting para gerir timeout etc.
+          
           fsm6.new_state = dice_detecting;
-          // não zera forwardCount aqui (mantemos)
+          
         }
       }
     }
     else if (fsm6.state == dice_detecting) {
-      // Se atingimos 3 forwards alternados com backs -> lançamento
+      
       if (forwardCount >= 3) {
         Serial.println("3 abanos (frente-trás) detetados -> launching");
         forwardCount = 0;
         lastDetectedSign = 0;
         fsm6.new_state = dice_launching;
       }
-      // timeout para cancel
+      // timeout to cancel
       else if (nowMs - lastPeakTime > SEQUENCE_TIMEOUT_MS) {
         forwardCount = 0;
         lastDetectedSign = 0;
         fsm6.new_state = dice_idle;
       }
-      // caso contrário permanecemos detecting até completarmos
+     
     }
     else if (fsm6.state == dice_launching) {
-      // entramos aqui imediatamente quando new_state foi set; executar animação e resultados
+      
       rollDiceAnimationAndResults(); // sets inRollingAnimation = true internally
       fsm6.new_state = dice_showing;
     }
     else if (fsm6.state == dice_showing) {
-      // mostra resultados finais (rollDiceAnimationAndResults já desenhou resultados)
-      // aguarda Sesc para voltar ao menu
+      
       if (Sesc && !prevSesc) {
         forwardCount = 0;
         lastDetectedSign = 0;
         fsm6.new_state = dice_idle;
         menuPage = 0;
-        inRollingAnimation = false; // libera o menu para redesenhar
+        inRollingAnimation = false; 
       }
     }
 
     // commit fsm6 state
     set_state(fsm6, fsm6.new_state);
 
-    // --- Ações do menu --- //
-    // só redesenha o menu se não estivermos numa animação de roll/show
+    // --- Menu Actions--- //
+    //roll/show
     if (!inRollingAnimation) {
       if (fsm4.state == down ) {
         menuIndex++;
@@ -775,7 +768,7 @@ void loop() {
       }
 
       if (fsm4.state == rest_select && fsm4.tis < 100) {
-        menuPage = menuIndex + 1; // entra na página correspondente
+        menuPage = menuIndex + 1;
       }
     }
 
@@ -860,12 +853,12 @@ void loop() {
     // -- DISPLAY PAGES --
     if (fsm2.state == sm2_on) {
 
-      // Página principal do menu
+      //menu
       if (menuPage == 0) {
         if (!inRollingAnimation) drawMenu();
         // if inRollingAnimation, keep the animation/results on screen
       }
-      // Página 1: IMU Data
+      // IMU Data
       else if (menuPage == 1) {
         if (!inRollingAnimation) {
           display.clearDisplay();
@@ -884,7 +877,7 @@ void loop() {
           display.display();
         }
       }
-      // Página 2: Calibração
+      //Calibration
       else if (menuPage == 2) {
         if (!inRollingAnimation) {
           display.clearDisplay();
@@ -909,7 +902,7 @@ void loop() {
         }
       }
 
-      // Página 3: Numero de Dados
+      // Number of dices
       else if (menuPage == 3) {
         if (!inRollingAnimation) {
           display.clearDisplay();
@@ -926,7 +919,7 @@ void loop() {
         }
       }
 
-      // Página 4: Dice Range
+      //Dice Range
       else if (menuPage == 4) {
         if (!inRollingAnimation) {
           display.clearDisplay();
@@ -946,7 +939,7 @@ void loop() {
         }
       }
 
-      // Página 5: Tempo de spin
+      // Spin Time
       else if (menuPage == 5) {
         if (!inRollingAnimation) {
           display.clearDisplay();
@@ -964,7 +957,7 @@ void loop() {
         }
       }
 
-      // Botão de voltar (edge)
+      //back
       if (!inRollingAnimation && Sesc && menuPage != 0 && !prevSesc) {
         menuPage = 0;
       }
@@ -979,4 +972,5 @@ void loop() {
       Sok, Snext, Sesc, fsm1.state, fsm2.state, fsm3.state, fsm4.state, fsm5.state, fsm6.state, calibratedDone ? 1 : 0);
 
   } // end if (delta >= interval)
+
 } // end loop
